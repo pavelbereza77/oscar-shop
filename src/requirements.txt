@@ -1,0 +1,18 @@
+Django>=4.2,<5.0
+django-oscar==4.1
+psycopg[binary]>=3.1,<4.0
+gunicorn>=21.0,<23.0
+whitenoise>=6.0,<7.0
+# Драйвер для подключения к серверу
+elasticsearch>=7.0.0,<8.0.0
+# Инструмент для удобного составления запросов
+elasticsearch-dsl>=7.0
+django-extensions>=3.2,<4.0
+
+# Дополнительные зависимости для Oscar
+django-treebeard
+django-haystack
+
+# Дополнительные зависимости
+Pillow
+django-model-utils
