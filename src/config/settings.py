@@ -182,7 +182,7 @@ HAYSTACK_CONNECTIONS = {
         # Используем бэкенд для Elasticsearch 7.x
         'ENGINE': 'haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine',
         # URL к контейнеру с OpenSearch
-        'URLS': ['http://search:9200'],
+        'URL': ['http://search:9200'],
         # Название индекса в OpenSearch
         'INDEX_NAME': 'oscar',
     },
@@ -232,7 +232,7 @@ TEMPLATES = [
                 # Контекстные процессоры Oscar (стандартный набор)
                 ('oscar.apps.search.context_processors.search_form'),
                 ('oscar.apps.checkout.context_processors.checkout'),
-                ('oscar.apps.customer.notifications.context_processors.notifications'),
+                # ('oscar.apps.customer.notifications.context_processors.notifications'),
                 ('oscar.core.context_processors.metadata'),
             ],
         },
@@ -279,3 +279,7 @@ OSCAR_ORDERS_PER_PAGE = 20
 OSCAR_ADDRESSES_PER_PAGE = 10
 # Количество уведомлений на странице в личном кабинете
 OSCAR_NOTIFICATIONS_PER_PAGE = 10
+# Название магазина
+OSCAR_SHOP_NAME = "Stroymir"
+# Слоган магазина (подзаголовок)
+OSCAR_SHOP_TAGLINE = "Современный интернет-магазин на Django"
