@@ -25,14 +25,7 @@ web	Основное приложение. Django-бэкенд с логикой
 ---
 
 ## 📦 Структура проекта
-oscar-shop/ # Корень проекта
-├── .env              # Файл с переменными окружения (пароли, настройки)
-├── data/             # Папка для данных БД и OpenSearch (монтирование в Docker)
-├── docker-compose.yml # Конфигурация сервисов (web, db, redis, search)
-├── Dockerfile         # Инструкции для сборки образа приложения
-├── requirements.txt   # Зависимости Python
-└── src/               # Исходный код приложения
-    └── config/        # Настройки Django (settings.py, urls.py, wsgi.py)
+oscar-shop/ # Корень проекта├── .env              # Файл с переменными окружения (пароли, настройки)├── data/             # Папка для данных БД и OpenSearch (монтирование в Docker)├── docker-compose.yml # Конфигурация сервисов (web, db, redis, search)├── Dockerfile         # Инструкции для сборки образа приложения├── requirements.txt   # Зависимости Python└── src/               # Исходный код приложения  └── config/        # Настройки Django (settings.py, urls.py, wsgi.py)
 ---
 
 ## 🛠️ Ключевые настройки и решения (HACKS)
@@ -147,6 +140,30 @@ users/
 Изменить логику расчета стоимости доставки в корзине.
 Написать свой обработчик платежей.
 Правильный способ сделать это — «переопределить» (override) стандартное приложение. Вы берете код системного приложения (например, oscar.apps.customer.models) и копируете его в свою папку (src/apps/customer/models.py), а затем вносите изменения там. Django автоматически подхватит ваш код вместо системного.
+
+🧹 Очистка базы данных и повторный запуск миграций
+Этот метод позволяет полностью сбросить состояние базы данных, что решает многие проблемы с зависимостями миграций.
+
+Важно: Все данные в базе данных будут удалены.
+
+Остановите контейнеры:
+docker compose stop
+Зайдите в контейнер базы данных:
+docker compose exec db bash
+Подключитесь к PostgreSQL:
+psql -U $POSTGRES_USER -d $POSTGRES_DB
+Выполните команды очистки внутри консоли PostgreSQL:
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+GRANT ALL ON SCHEMA public TO public;
+Выйдите из консоли PostgreSQL:Напечатайте \q и нажмите Enter.
+Запустите контейнеры заново:
+docker compose up -d --build
+Примените миграции в контейнере web:
+docker compose exec web python manage.py migrate
+Создайте суперпользователя:
+docker compose exec web python manage.py createsuperuser
+Обновите страницу в браузере.
 ---
 
 ## ⚙️ Как запустить проект
