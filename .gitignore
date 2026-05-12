@@ -62,8 +62,10 @@ venv.bak/
 .docker/
 docker-compose.override.yml
 
-# Данные и логи (наши специфичные папки)
-# Данные баз данных и кэша
-/data/ # Папка для данных БД и OpenSearch, не храним историю
+# Игнорировать ВСЁ в папке data
+/data/*
+
+# НО НЕ ИГНОРИРОВАТЬ файлы .gitkeep
+!/data/.gitkeep
 # Папка с собранными статическими файлами Django
 /src/staticfiles
