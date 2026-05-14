@@ -28,55 +28,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
-
-  search:
-    image: opensearchproject/opensearch:2.13.0
-    container_name: opensearch
-    restart: unless-stopped
-    environment:
-      discovery.type: single-node
-      # --- НАСТРОЙКИ БЕЗОПАСНОСТИ ---
-      # Оставляем отключенным, чтобы избежать проблем с healthcheck и запуском
-      "plugins.security.disabled": "true"
-      # Пароль все равно не будет работать, так как плагин выключен,
-      # но переменная может требоваться образом для корректной инициализации.
-      "OPENSEARCH_INITIAL_ADMIN_PASSWORD": ${OPENSEARCH_INITIAL_ADMIN_PASSWORD} 
-      # --- ДРУГИЕ НАСТРОЙКИ ---
-      "OPENSEARCH_JAVA_OPTS": "-Xms512m -Xmx512m"
-      "http.host": "0.0.0.0"
-      "network.host": "0.0.0.0"
-    ports:
-      - "${OPENSEARCH_PORT}:9200"
-    volumes:
-      - ./data/osdata:/usr/share/opensearch/data 
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://search:9200"]
-      interval: 30s
-      timeout: 10s
-      retries: 10
-
-  search-dashboards:
-    image: opensearchproject/opensearch-dashboards:2.13.0
-    container_name: opensearch-dashboards
-    restart: unless-stopped
-    environment:
-      OPENSEARCH_HOSTS: '["http://search:9200"]'
-      
-      # --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
-      # Эта переменная отключает базовую HTTP-аутентификацию (окно логина)
-      DISABLE_SECURITY_HTTP_BASIC: "true"
-      
-      # Эти переменные теперь не обязательны, но оставлены для ясности
-      OPENSEARCH_USERNAME: ""
-      OPENSEARCH_PASSWORD: ""
-      OPENSEARCH_SSL: "false"
-      OPENSEARCH_SSL_VERIFY: "false"
-    ports:
-      - "${OPENSEARCH_DASHBOARD_PORT}:5601"
-    depends_on:
-      search:
-        condition: service_healthy
-
   web:
     build: ./src
     env_file: ./.env
@@ -86,117 +37,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      search:
-        condition: service_healthy
-      search-dashboards:
-        condition: service_started
+      # search:
+      #   condition: service_healthy
+      # kibana: # <-- ДОБАВИТЬ ЭТУ СТРОКУ
+      #   condition: service_started
     ports:
       - "8000:8000"
     volumes:
       - ./src:/code
-    # --- ЗАМЕНИТЕ ЭТУ СТРОКУ ---
-    # command: > 
-    #   bash -c "python manage.py migrate --noinput &&
-    #           python manage.py collectstatic --noinput &&
-    #           python manage.py runserver 0.0.0.0:8000"
-    
-    # --- НА ЭТУ ---
-    
-    entrypoint: ["/bin/sh", "-c", "rm -f /usr/local/lib/python3.11/site-packages/oscar/apps/customer/migrations/0008_assign_permissions_to_staff.py && exec gunicorn config.wsgi:application --bind 0.0.0.0:8000"]
+    environment: 
+      - DJANGO_SETTINGS_MODULE=config.settings 
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3
 
-# services:
-#   postgres:
-#     image: postgres:16-alpine
-#     container_name: postgres
-#     restart: unless-stopped
-#     environment:
-#       POSTGRES_DB: ${POSTGRES_DB}
-#       POSTGRES_USER: ${POSTGRES_USER}
-#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#     ports:
-#       - "${POSTGRES_PORT}:5432"
-#     volumes:
-#       - ./data/postgres:/var/lib/postgresql/data
-#     healthcheck:
-#       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-#       interval: 5s
-#       timeout: 3s
-#       retries: 20
-
-#   redis:
-#     image: redis:7-alpine
-#     container_name: redis
-#     restart: unless-stopped
-#     ports:
-#       - "6379:6379"
-#     healthcheck:
-#       test: ["CMD", "redis-cli", "ping"]
-#       interval: 5s
-#       timeout: 3s
-#       retries: 20
-
-
-#   search:
-#     image: opensearchproject/opensearch:2.13.0
-#     container_name: opensearch
-#     restart: unless-stopped
-#     environment:
-#       discovery.type: single-node
-#       # --- НАСТРОЙКИ БЕЗОПАСНОСТИ ---
-#       "plugins.security.disabled": "true"
-#       "OPENSEARCH_INITIAL_ADMIN_PASSWORD": ${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
-#       # --- ДРУГИЕ НАСТРОЙКИ ---
-#       "OPENSEARCH_JAVA_OPTS": "-Xms512m -Xmx512m"
-#       "http.host": "0.0.0.0"
-#       "network.host": "0.0.0.0"
-#     ports:
-#       - "${OPENSEARCH_PORT}:9200"
-#     volumes:
-#       - ./data/osdata:/usr/share/opensearch/data # Эта папка была пустой после удаления!
-#     healthcheck:
-#       test: ["CMD", "curl", "-f", "http://search:9200"]
-#       interval: 30s
-#       timeout: 10s
-#       retries: 10
-  
-#   search-dashboards:
-#     image: opensearchproject/opensearch-dashboards:2.13.0
-#     container_name: opensearch-dashboards
-#     restart: unless-stopped
-#     environment:
-#       OPENSEARCH_HOSTS: '["http://search:9200"]'
-#       # Отключаем проверку безопасности
-#       OPENSEARCH_USERNAME: ""
-#       OPENSEARCH_PASSWORD: ""
-#       OPENSEARCH_SSL: "false"
-#       OPENSEARCH_SSL_VERIFY: "false"
-#     ports:
-#       - "${OPENSEARCH_DASHBOARD_PORT}:5601"
-#     depends_on:
-#       search:
-#         condition: service_healthy
-
-  
-#   web:
-#     build: ./app
-#     env_file: ./.env
-#     restart: unless-stopped
-#     depends_on:
-#       postgres:
-#         condition: service_healthy
-#       redis:
-#         condition: service_healthy
-#       search:
-#         condition: service_healthy
-#       search-dashboards:
-#         condition: service_started
-#     ports:
-#       - "8000:8000"
-#     volumes:
-#       - ./app:/code # Изменили путь монтирования
-#     command: >
-#       bash -c "python manage.py migrate --noinput &&
-#               python manage.py collectstatic --noinput &&
-#               python manage.py runserver 0.0.0.0:8000"
-    
-  

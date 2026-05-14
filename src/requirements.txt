@@ -1,18 +1,51 @@
+# Ядро проекта
 Django>=4.2,<5.0
 django-oscar==4.1
 psycopg[binary]>=3.1,<4.0
+# psycopg2-binary==2.9.3
+
 gunicorn>=21.0,<23.0
 whitenoise>=6.0,<7.0
-# Драйвер для подключения к серверу
-elasticsearch>=7.0.0,<8.0.0
-# Инструмент для удобного составления запросов
-elasticsearch-dsl>=7.0
-django-extensions>=3.2,<4.0
+
+# Поиск (ВАЖНО: Убрали elasticsearch и elasticsearch-dsl)
+Whoosh==2.7.4 # Движок поиска, работающий локально
 
 # Дополнительные зависимости для Oscar
-django-treebeard
-django-haystack
+django-treebeard>=4.0 # Актуальная версия
+django-haystack>=3.0 # Версия 3.x лучше всего работает с Whoosh и Django 4.x
 
 # Дополнительные зависимости
-Pillow
-django-model-utils
+Pillow>=10.0 # Библиотека для работы с изображениями
+django-model-utils>=4.0
+sorl-thumbnail>=12.7 # Для генерации превью товаров
+easy-thumbnails>=2.7 # Альтернатива для превью
+
+# Для стилизации админки (рекомендуется)
+jet-django>=1.2.0
+# django-jet>=2.1.0 # Красивый и удобный интерфейс для админ-панели Django
+django-environ>=0.9.0
+# django-oscar-docs
+pycountry
+# Django>=4.2,<5.0
+# django-oscar==4.1
+# psycopg[binary]>=3.1,<4.0
+# gunicorn>=21.0,<23.0
+# whitenoise>=6.0,<7.0
+# # Драйвер для подключения к серверу
+# elasticsearch>=7.0.0,<8.0.0
+# # Инструмент для удобного составления запросов
+# elasticsearch-dsl>=7.0
+# django-extensions>=3.2,<4.0
+
+# # opensearch-py
+# Whoosh==2.7.4
+
+# # Дополнительные зависимости для Oscar
+# django-treebeard
+# django-haystack
+
+# # Дополнительные зависимости
+# Pillow
+# django-model-utils
+# sorl-thumbnail
+# easy-thumbnails

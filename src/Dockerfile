@@ -27,11 +27,14 @@ COPY requirements.txt .
 # 2. Устанавливает зависимости из requirements.txt
 # 3. Удаляет конфликтный файл миграций
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt 
-    # && 
-    #\
+    pip install --no-cache-dir -r requirements.txt  
+    # && \
     # rm -f /usr/local/lib/python3.11/site-packages/oscar/apps/customer/migrations/0008_assign_permissions_to_staff.py
-
+# --- ДОБАВЛЯЕМ ПРАВИЛЬНУЮ ЗАГЛУШКУ (С КЛАССОМ) В СИСТЕМНУЮ ПАПКУ ---
+# RUN mkdir -p /usr/local/lib/python3.11/site-packages/oscar/forms/widgets && \
+#     touch /usr/local/lib/python3.11/site-packages/oscar/forms/__init__.py && \
+#     touch /usr/local/lib/python3.11/site-packages/oscar/forms/widgets/__init__.py && \
+#     echo -e "from django.forms import widgets\n\nclass DatePickerInput(widgets.DateInput):\n    pass\n" > /usr/local/lib/python3.11/site-packages/oscar/forms/widgets/widgets.py
 # ... остальные строки (COPY . . и т.д.) ...
 # Копируем entrypoint
 COPY entrypoint.sh /entrypoint.sh

@@ -16,30 +16,29 @@ Including another URLconf
 """
 # src/config/urls.py
 
-# from django.conf import settings
 from django.urls import path, include
 from django.contrib import admin
-# from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
+from django.apps import apps
 
-# Админ-панель
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('i18n/', include('django.conf.urls.i18n')),
+    
 ]
+# print('Вывод путей OSCAR',apps.get_app_config('oscar').urls[0])
+# --- ПОДКЛЮЧАЕМ OSCAR ---
+# Используем i18n_patterns для поддержки языков.
+# который возвращает правильный application.
+urlpatterns += i18n_patterns(
+    path('', include(apps.get_app_config('oscar').urls[0])),
+    prefix_default_language=False,
+)
 
-# # Подключаем Oscar
-# if settings.DEBUG:
-#     # В режиме DEBUG показываем страницу "Установка прошла успешно"
-#     urlpatterns += [
-#         path('', TemplateView.as_view(template_name='oscar/index.html')),
-#     ]
-# else:
-#     # В боевом режиме подключаем реальные URL-адреса Oscar
-#     from oscar.app import application
-#     urlpatterns += [
-#         path('', application),
-#     ]
-
-# # Для DEBUG-режима (чтобы работали статические файлы)
-# if settings.DEBUG:
-#     from django.conf.urls.static import static
-#     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# --- DEBUG НАСТРОЙКИ ---
+if settings.DEBUG:
+    # В режиме разработки Django может обслуживать статику и медиа-файлы
+    from django.conf.urls.static import static
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
